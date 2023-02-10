@@ -7,32 +7,32 @@ namespace Penguin.Web.Configuration.Attributes
 {
     public sealed class RequiresConfigurationAttribute : ActionFilterAttribute, IActionFilter
     {
-        public string Configuration { get; set; }
+        public string Configuration { get; internal set; }
 
-        public bool Value { get; set; }
+        public bool Value { get; internal set; }
 
         public RequiresConfigurationAttribute(string configuration, bool value)
         {
-            this.Configuration = configuration;
-            this.Value = value;
+            Configuration = configuration;
+            Value = value;
         }
 
-        public override void OnActionExecuting(ActionExecutingContext filterContext)
+        public override void OnActionExecuting(ActionExecutingContext context)
         {
-            if (filterContext is null)
+            if (context is null)
             {
-                throw new System.ArgumentNullException(nameof(filterContext));
+                throw new System.ArgumentNullException(nameof(context));
             }
 
-            bool ConfigParsed = bool.TryParse(filterContext.HttpContext.RequestServices.GetService<IProvideConfigurations>().GetConfiguration(this.Configuration), out bool val);
+            bool ConfigParsed = bool.TryParse(context.HttpContext.RequestServices.GetService<IProvideConfigurations>().GetConfiguration(Configuration), out bool val);
 
-            if ((ConfigParsed && val != this.Value) || (this.Value && !ConfigParsed))
+            if ((ConfigParsed && val != Value) || (Value && !ConfigParsed))
             {
                 throw new FailedConfigurationCheckException();
             }
             else
             {
-                base.OnActionExecuting(filterContext);
+                base.OnActionExecuting(context);
             }
         }
     }
